@@ -1,0 +1,48 @@
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { LeadStatus } from '../enums/lead-status.enum';
+
+@Entity('leads')
+export class Leads {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ length: 255 })
+  nome!: string;
+
+  @Column({ unique: true })
+  email!: string;
+
+  @Column({ nullable: true })
+  telefone?: string;
+
+  @Column({ length: 255 })
+  empresa!: string;
+
+  @Column({ nullable: true })
+  cargo?: string;
+
+  @Column()
+  origem!: string;
+
+  @Column({
+    type: 'enum',
+    enum: LeadStatus,
+    default: LeadStatus.NOVO,
+  })
+  status!: LeadStatus;
+
+  @Column({ length: 500, nullable: true })
+  observacoes?: string;
+
+  @Column({ length: 255, nullable: true })
+  motivo_perda?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  perdido_em?: Date;
+
+  @CreateDateColumn()
+  created_at?: Date;
+
+  @UpdateDateColumn()
+  updated_at?: Date;
+}
