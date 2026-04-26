@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { LeadStatus } from '../enums/lead-status.enum';
+import { LeadOrigin } from '../enums/lead-origin.enum';
 
 @Entity('leads')
 export class Leads {
@@ -21,8 +22,11 @@ export class Leads {
   @Column({ nullable: true })
   cargo?: string;
 
-  @Column()
-  origem!: string;
+  @Column({
+    type: 'enum',
+    enum: LeadOrigin,
+  })
+  origem!: LeadOrigin;
 
   @Column({
     type: 'enum',
