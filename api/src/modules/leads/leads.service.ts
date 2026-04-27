@@ -61,7 +61,7 @@ export class LeadsService {
 
       const leadEmailExist = await this.leadsRepository.findOneBy({ email });
 
-      if (leadEmailExist && leadEmailExist) {
+      if (leadEmailExist && leadEmailExist.id !== id) {
         throw new ConflictException('Já existe um lead cadastrado com esse email!');
       }
 
@@ -79,8 +79,6 @@ export class LeadsService {
     if (!lead) {
       throw new NotFoundException('Lead não encontrado');
     }
-
-    lead.status = updateLeadStatusDto.status;
 
     if (updateLeadStatusDto.status === LeadStatus.PERDIDO) {
       throw new BadRequestException('Para marcar um lead como perdido, utilize a rota específica.');

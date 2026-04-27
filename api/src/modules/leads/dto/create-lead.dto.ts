@@ -1,5 +1,4 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-import { LeadStatus } from '../enums/lead-status.enum';
 import { LeadOrigin } from '../enums/lead-origin.enum';
 
 export class CreateLeadDTO {
@@ -28,10 +27,6 @@ export class CreateLeadDTO {
   @IsEnum(LeadOrigin)
   @IsNotEmpty()
   origem!: LeadOrigin;
-
-  @IsEnum(LeadStatus)
-  @IsNotEmpty()
-  status!: LeadStatus;
 
   @IsString()
   @IsOptional()

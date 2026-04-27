@@ -1,6 +1,6 @@
 export enum LeadOrigin {
   INSTAGRAM = 'instagram',
-  LINKDIN = 'linkedin',
+  LINKEDIN = 'linkedin',
   GOOGLE = 'google',
   INDICACAO = 'indicacao',
   SITE = 'site',
