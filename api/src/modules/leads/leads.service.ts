@@ -1,24 +1,28 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Leads } from './entities/leads.entity';
+import { Lead } from './entities/leads.entity';
 import { Repository } from 'typeorm';
 import { CreateLeadDTO } from './dto/create-lead.dto';
 import { LeadStatus } from './enums/lead-status.enum';
-import { UpdateLeadDto } from './dto/updated-lead.dto';
-import { UpdateLeadStatusDTO } from './dto/updated-lead-status.dto';
+import { UpdateLeadDto } from './dto/update-lead.dto';
+import { UpdateLeadStatusDTO } from './dto/update-lead-status.dto';
 import { MarkLeadAsLostDTO } from './dto/mark-status-as-lost.dto';
 
 @Injectable()
 export class LeadsService {
   constructor(
-    @InjectRepository(Leads)
-    private readonly leadsRepository: Repository<Leads>,
+    @InjectRepository(Lead)
+    private readonly leadsRepository: Repository<Lead>,
   ) {}
 
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
   async create(createLeadDto: CreateLeadDTO) {
-    const leadEmailExist = await this.leadsRepository.findOneBy({
-      email: createLeadDto.email,
-    });
+    const email = this.normalizeEmail(createLeadDto.email);
+
+    const leadEmailExist = await this.leadsRepository.findOneBy({ email });
 
     if (leadEmailExist) {
       throw new ConflictException('Já existe um lead cadastrado com este e-mail');
@@ -26,6 +30,7 @@ export class LeadsService {
 
     const lead = this.leadsRepository.create({
       ...createLeadDto,
+      email,
       status: LeadStatus.NOVO,
     });
 
@@ -37,16 +42,14 @@ export class LeadsService {
     return leads;
   }
 
-  async findOneBy(id: number) {
-    const leads_id = await this.leadsRepository.findOneBy({
-      id: id,
-    });
+  async findById(id: number) {
+    const lead = await this.leadsRepository.findOneBy({ id });
 
-    if (!leads_id) {
+    if (!lead) {
       throw new NotFoundException(`O Lead de id ${id}, não foi encontrado!`);
     }
 
-    return leads_id;
+    return lead;
   }
 
   async updateLead(id: number, updateLeadDto: UpdateLeadDto) {
@@ -57,7 +60,7 @@ export class LeadsService {
     }
 
     if (updateLeadDto.email) {
-      const email = updateLeadDto.email.trim().toLocaleLowerCase();
+      const email = this.normalizeEmail(updateLeadDto.email);
 
       const leadEmailExist = await this.leadsRepository.findOneBy({ email });
 
@@ -84,9 +87,29 @@ export class LeadsService {
       throw new BadRequestException('Para marcar um lead como perdido, utilize a rota específica.');
     }
 
+    if (updateLeadStatusDto.status === LeadStatus.CONVERTIDO) {
+      throw new BadRequestException('Para converter um lead, utilize a rota específica.');
+    }
+
     lead.status = updateLeadStatusDto.status;
-    lead.motivo_perda = undefined;
-    lead.perdido_em = undefined;
+    lead.motivo_perda = null;
+    lead.perdido_em = null;
+
+    return await this.leadsRepository.save(lead);
+  }
+
+  async convertLead(id: number) {
+    const lead = await this.leadsRepository.findOneBy({ id });
+
+    if (!lead) {
+      throw new NotFoundException('Lead não encontrado');
+    }
+
+    if (lead.status === LeadStatus.CONVERTIDO) {
+      throw new BadRequestException('Este lead já foi convertido.');
+    }
+
+    lead.status = LeadStatus.CONVERTIDO;
 
     return await this.leadsRepository.save(lead);
   }

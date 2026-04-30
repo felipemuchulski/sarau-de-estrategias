@@ -2,8 +2,8 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateCol
 import { LeadStatus } from '../enums/lead-status.enum';
 import { LeadOrigin } from '../enums/lead-origin.enum';
 
-@Entity('leads')
-export class Leads {
+@Entity('lead')
+export class Lead {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -39,10 +39,10 @@ export class Leads {
   observacoes?: string;
 
   @Column({ length: 255, nullable: true })
-  motivo_perda?: string;
+  motivo_perda?: string | null;
 
   @Column({ type: 'timestamp', nullable: true })
-  perdido_em?: Date;
+  perdido_em?: Date | null;
 
   @CreateDateColumn()
   created_at?: Date;
